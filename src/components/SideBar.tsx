@@ -1,6 +1,7 @@
 import { For, Show, type Component } from "solid-js";
 import TablerPlus from "~icons/tabler/plus";
 import TablerAlbum from "~icons/tabler/album";
+import { A } from "@solidjs/router";
 
 // Mock data for projects - replace with actual data later
 const mockProjects = [
@@ -110,18 +111,24 @@ export default function SideBar() {
       <nav class="flex-1 p-4 space-y-2">
         {/* Dashboard */}
         <div class="mb-6">
-          <button class="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg hover:bg-gray-100 transition-colors group">
+          <A
+            href="/"
+            class="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg hover:bg-gray-100 transition-colors group"
+          >
             <TablerAlbum />
             <span class="text-sm font-medium text-gray-700 group-hover:text-black">
               Today
             </span>
-          </button>
-          <button class="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg hover:bg-gray-100 transition-colors group">
+          </A>
+          <A
+            href="/overview"
+            class="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg hover:bg-gray-100 transition-colors group"
+          >
             <TablerAlbum />
             <span class="text-sm font-medium text-gray-700 group-hover:text-black">
               Overview
             </span>
-          </button>
+          </A>
         </div>
 
         {/* Projects Section */}
