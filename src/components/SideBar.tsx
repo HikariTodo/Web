@@ -1,4 +1,4 @@
-import { For, type Component } from "solid-js";
+import { For, Show, type Component } from "solid-js";
 import TablerPlus from "~icons/tabler/plus";
 import TablerAlbum from "~icons/tabler/album";
 
@@ -53,28 +53,24 @@ const ProjectItem: Component<{ project: Project; depth?: number }> = (
   return (
     <>
       <button class="w-full flex items-center px-3 py-2 text-left rounded-lg hover:bg-gray-100 transition-colors group relative">
-        {/* Hierarchy bars */}
-        {depth() > 0 && (
-          <>
-            <For each={Array.from({ length: depth() })}>
-              {(_, i) => (
-                <div
-                  class="absolute top-0 bottom-0 w-0.5 bg-gray-200"
-                  style={{
-                    left: `${12 + i() * 16}px`,
-                  }}
-                />
-              )}
-            </For>
-            {/* Connection line */}
-            <div
-              class="absolute top-1/2 w-3 h-0.5 bg-gray-200"
-              style={{
-                left: `${12 + (depth() - 1) * 16}px`,
-              }}
-            />
-          </>
-        )}
+        <Show when={depth() > 0}>
+          <For each={Array.from({ length: depth() })}>
+            {(_, i) => (
+              <div
+                class="absolute top-0 bottom-0 w-0.5 bg-gray-200"
+                style={{
+                  left: `${12 + i() * 16}px`,
+                }}
+              />
+            )}
+          </For>
+          <div
+            class="absolute top-1/2 w-3 h-0.5 bg-gray-200"
+            style={{
+              left: `${12 + (depth() - 1) * 16}px`,
+            }}
+          />
+        </Show>
 
         <div
           class="flex-1 min-w-0 flex items-center justify-between"
