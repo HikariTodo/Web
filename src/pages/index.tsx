@@ -1,6 +1,18 @@
 import SideBar from "../components/SideBar";
 import { For, createSignal } from "solid-js";
 
+interface Task {
+  id: number;
+  title: string;
+  deadline: string;
+  priority: "high" | "low";
+  project: string;
+  subproject: string;
+  assignedToToday: boolean;
+  status: "todo" | "doing" | "done";
+  completedAt: string | null;
+}
+
 // Mock data for tasks - replace with actual data later
 const mockTasks = [
   {
@@ -12,6 +24,7 @@ const mockTasks = [
     subproject: "Client Projects",
     assignedToToday: false,
     status: "todo",
+    completedAt: null,
   },
   {
     id: 2,
@@ -22,6 +35,7 @@ const mockTasks = [
     subproject: "Health & Fitness",
     assignedToToday: true,
     status: "doing",
+    completedAt: null,
   },
   {
     id: 3,
@@ -31,6 +45,7 @@ const mockTasks = [
     project: "Work",
     assignedToToday: false,
     status: "todo",
+    completedAt: null,
   },
   {
     id: 4,
@@ -41,6 +56,7 @@ const mockTasks = [
     subproject: "Client Projects",
     assignedToToday: true,
     status: "todo",
+    completedAt: null,
   },
   {
     id: 5,
@@ -50,6 +66,7 @@ const mockTasks = [
     project: "Personal",
     assignedToToday: false,
     status: "done",
+    completedAt: "2025-10-02T10:30:00",
   },
   {
     id: 6,
@@ -59,8 +76,9 @@ const mockTasks = [
     project: "Personal",
     assignedToToday: true,
     status: "todo",
+    completedAt: null,
   },
-];
+] as Task[];
 
 function getPriorityOrder(priority: string) {
   switch (priority) {
@@ -125,6 +143,26 @@ function getBreadcrumbs(project: string, subproject?: string) {
   return project;
 }
 
+function getTimeAgo(completedAt: string) {
+  const completed = new Date(completedAt);
+  const now = new Date();
+  const diffMs = now.getTime() - completed.getTime();
+
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 0) {
+    return `${diffDays}d ago`;
+  } else if (diffHours > 0) {
+    return `${diffHours}h ago`;
+  } else if (diffMinutes > 0) {
+    return `${diffMinutes}m ago`;
+  } else {
+    return "Just now";
+  }
+}
+
 // Custom checkbox component for three states
 function TaskCheckbox(props: { status: string; onClick: () => void }) {
   return (
@@ -180,7 +218,15 @@ export default function View() {
               ? "done"
               : "todo"; // Reset from done back to todo if needed
 
-          return { ...task, status: nextStatus };
+          // Set completion date when marking as done, clear it when not done
+          const completedAt =
+            nextStatus === "done"
+              ? new Date().toISOString()
+              : nextStatus === "todo"
+              ? null
+              : task.completedAt;
+
+          return { ...task, status: nextStatus, completedAt };
         }
         return task;
       })
@@ -454,6 +500,11 @@ export default function View() {
                             <div class="text-xs text-gray-400 mb-1">
                               Completed
                             </div>
+                            {task.completedAt && (
+                              <div class="text-xs text-gray-500 mb-1">
+                                {getTimeAgo(task.completedAt)}
+                              </div>
+                            )}
                             <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">
                               Done
                             </span>
