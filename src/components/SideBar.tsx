@@ -56,14 +56,16 @@ const ProjectItem: Component<{ project: Project; depth?: number }> = (
         {/* Hierarchy bars */}
         {depth() > 0 && (
           <>
-            {Array.from({ length: depth() }, (_, i) => (
-              <div
-                class="absolute top-0 bottom-0 w-0.5 bg-gray-200"
-                style={{
-                  left: `${12 + i * 16}px`,
-                }}
-              />
-            ))}
+            <For each={Array.from({ length: depth() })}>
+              {(_, i) => (
+                <div
+                  class="absolute top-0 bottom-0 w-0.5 bg-gray-200"
+                  style={{
+                    left: `${12 + i() * 16}px`,
+                  }}
+                />
+              )}
+            </For>
             {/* Connection line */}
             <div
               class="absolute top-1/2 w-3 h-0.5 bg-gray-200"
@@ -86,13 +88,11 @@ const ProjectItem: Component<{ project: Project; depth?: number }> = (
           </span>
         </div>
       </button>
-      {props.project.subprojects && (
-        <For each={props.project.subprojects}>
-          {(subproject) => (
-            <ProjectItem project={subproject} depth={depth() + 1} />
-          )}
-        </For>
-      )}
+      <For each={props.project.subprojects}>
+        {(subproject) => (
+          <ProjectItem project={subproject} depth={depth() + 1} />
+        )}
+      </For>
     </>
   );
 };
@@ -101,7 +101,7 @@ export default function SideBar() {
   return (
     <aside class="h-screen w-64 bg-white border-r border-gray-300 flex flex-col">
       {/* Header */}
-      <div class="p-6 border-b border-gray-300">
+      <div class="px-6 py-4 border-b border-gray-300">
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
             <span class="text-white text-sm font-semibold">//</span>
