@@ -233,6 +233,17 @@ export default function View() {
     );
   };
 
+  const handleGiveUpTask = (taskId: number) => {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) => {
+        if (task.id === taskId && task.status === "doing") {
+          return { ...task, status: "todo", completedAt: null };
+        }
+        return task;
+      })
+    );
+  };
+
   // Get today's date in YYYY-MM-DD format
   const todayString = new Date().toISOString().split("T")[0];
 
@@ -343,9 +354,17 @@ export default function View() {
                               remaining
                             </div>
                           </div>
-                          <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
-                            In Progress
-                          </span>
+                          <div class="flex items-center gap-2">
+                            <button
+                              onClick={() => handleGiveUpTask(task.id)}
+                              class="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                            >
+                              Give up
+                            </button>
+                            <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                              In Progress
+                            </span>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -475,7 +494,7 @@ export default function View() {
             {doneTasks().length > 0 && (
               <div>
                 <h2 class="text-sm font-semibold text-green-800 mb-3 uppercase tracking-wider">
-                  Completed Today
+                  Completed
                 </h2>
                 <div class="space-y-3">
                   <For each={doneTasks()}>
