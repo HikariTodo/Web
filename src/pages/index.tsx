@@ -125,6 +125,47 @@ function getBreadcrumbs(project: string, subproject?: string) {
   return project;
 }
 
+// Custom checkbox component for three states
+function TaskCheckbox(props: { status: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={props.onClick}
+      class="mt-1 flex-shrink-0 w-6 h-6 rounded-full border-2 transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-300"
+      classList={{
+        // Todo state - empty checkbox
+        "border-gray-300 bg-white hover:border-gray-400":
+          props.status === "todo",
+        // Doing state - blue with dash
+        "border-blue-500 bg-blue-500": props.status === "doing",
+        // Done state - green with checkmark
+        "border-green-500 bg-green-500": props.status === "done",
+      }}
+    >
+      <div class="w-full h-full flex items-center justify-center">
+        {/* Doing state - horizontal dash */}
+        {props.status === "doing" && (
+          <div class="w-2.5 h-.5 bg-white rounded-full" />
+        )}
+
+        {/* Done state - checkmark */}
+        {props.status === "done" && (
+          <svg
+            class="w-4 h-4 text-white"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        )}
+      </div>
+    </button>
+  );
+}
+
 export default function View() {
   const [tasks, setTasks] = createSignal(mockTasks);
 
@@ -219,24 +260,10 @@ export default function View() {
                       <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
                         <div class="flex items-start justify-between mb-2">
                           <div class="flex items-start gap-3 flex-1">
-                            <button
+                            <TaskCheckbox
+                              status={task.status}
                               onClick={() => handleTaskStatusChange(task.id)}
-                              class="mt-1 flex-shrink-0"
-                            >
-                              <div class="w-4 h-4 border-2 border-blue-500 rounded bg-blue-500 flex items-center justify-center">
-                                <svg
-                                  class="w-3 h-3 text-white"
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path
-                                    fill-rule="evenodd"
-                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                    clip-rule="evenodd"
-                                  />
-                                </svg>
-                              </div>
-                            </button>
+                            />
                             <div class="flex-1 min-w-0">
                               <h3 class="text-sm font-medium text-black mb-1">
                                 {task.title}
@@ -293,12 +320,10 @@ export default function View() {
                       <div class="bg-white border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
                         <div class="flex items-start justify-between mb-2">
                           <div class="flex items-start gap-3 flex-1">
-                            <button
+                            <TaskCheckbox
+                              status={task.status}
                               onClick={() => handleTaskStatusChange(task.id)}
-                              class="mt-1 flex-shrink-0"
-                            >
-                              <div class="w-4 h-4 border-2 border-gray-300 rounded hover:border-gray-400 transition-colors" />
-                            </button>
+                            />
                             <div class="flex-1 min-w-0">
                               <h3 class="text-sm font-medium text-black mb-1">
                                 {task.title}
@@ -352,12 +377,10 @@ export default function View() {
                       <div class="bg-white border border-red-200 rounded-lg p-4 hover:border-red-300 transition-colors">
                         <div class="flex items-start justify-between mb-2">
                           <div class="flex items-start gap-3 flex-1">
-                            <button
+                            <TaskCheckbox
+                              status={task.status}
                               onClick={() => handleTaskStatusChange(task.id)}
-                              class="mt-1 flex-shrink-0"
-                            >
-                              <div class="w-4 h-4 border-2 border-gray-300 rounded hover:border-gray-400 transition-colors" />
-                            </button>
+                            />
                             <div class="flex-1 min-w-0">
                               <h3 class="text-sm font-medium text-black mb-1">
                                 {task.title}
@@ -414,24 +437,10 @@ export default function View() {
                       <div class="bg-green-50 border border-green-200 rounded-lg p-4 opacity-75">
                         <div class="flex items-start justify-between mb-2">
                           <div class="flex items-start gap-3 flex-1">
-                            <button
+                            <TaskCheckbox
+                              status={task.status}
                               onClick={() => handleTaskStatusChange(task.id)}
-                              class="mt-1 flex-shrink-0"
-                            >
-                              <div class="w-4 h-4 border-2 border-green-500 rounded bg-green-500 flex items-center justify-center">
-                                <svg
-                                  class="w-3 h-3 text-white"
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path
-                                    fill-rule="evenodd"
-                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                    clip-rule="evenodd"
-                                  />
-                                </svg>
-                              </div>
-                            </button>
+                            />
                             <div class="flex-1 min-w-0">
                               <h3 class="text-sm font-medium text-gray-600 line-through mb-1">
                                 {task.title}
