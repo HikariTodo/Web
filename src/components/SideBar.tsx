@@ -21,7 +21,10 @@ const ProjectItem: Component<{
 
   return (
     <>
-      <button class="w-full flex items-center px-3 py-2 text-left rounded-lg hover:bg-gray-100 transition-colors group relative">
+      <A
+        href={`/projects/${props.project.id}`}
+        class="w-full flex items-center px-3 py-2 text-left rounded-lg hover:bg-gray-100 transition-colors group relative"
+      >
         <Show when={depth() > 0}>
           <For each={Array.from({ length: depth() })}>
             {(_, i) => (
@@ -52,7 +55,7 @@ const ProjectItem: Component<{
             {props.project.taskCount}
           </span> */}
         </div>
-      </button>
+      </A>
       <For each={props.project.subprojects}>
         {(subproject) => (
           <ProjectItem project={subproject} depth={depth() + 1} />
@@ -73,7 +76,7 @@ const SideBar: VoidComponent = () => {
     if (!returning) return;
 
     await refetch();
-    navigate(`/tasks/${returning.id}`);
+    navigate(`/projects/${returning.id}`);
   };
 
   return (
