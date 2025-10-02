@@ -1,56 +1,22 @@
-import { For, Show, type Component } from "solid-js";
+import {
+  createResource,
+  For,
+  Show,
+  Suspense,
+  type Component,
+  type VoidComponent,
+} from "solid-js";
 import TablerPlus from "~icons/tabler/plus";
 import TablerAlbum from "~icons/tabler/album";
 import { A, useNavigate } from "@solidjs/router";
 import { useDialog } from "../hooks/dialog";
 import CreateProject from "./dialogs/CreateProject";
+import { getProjects, type Project } from "../api/projects";
 
-// Mock data for projects - replace with actual data later
-const mockProjects = [
-  {
-    id: 1,
-    name: "Personal",
-    taskCount: 5,
-    subprojects: [
-      {
-        id: 5,
-        name: "Health & Fitness",
-        taskCount: 3,
-        subprojects: [{ id: 8, name: "Gym Routine", taskCount: 2 }],
-      },
-      { id: 6, name: "Personal Development", taskCount: 1 },
-    ],
-  },
-  {
-    id: 2,
-    name: "Work",
-    taskCount: 12,
-    subprojects: [
-      {
-        id: 7,
-        name: "Client Projects",
-        taskCount: 8,
-        subprojects: [
-          { id: 9, name: "Website Redesign", taskCount: 5 },
-          { id: 10, name: "Mobile App", taskCount: 3 },
-        ],
-      },
-    ],
-  },
-  { id: 3, name: "Home Renovation", taskCount: 8 },
-  { id: 4, name: "Learning", taskCount: 3 },
-];
-
-interface Project {
-  id: number;
-  name: string;
-  taskCount: number;
-  subprojects?: Project[];
-}
-
-const ProjectItem: Component<{ project: Project; depth?: number }> = (
-  props
-) => {
+const ProjectItem: Component<{
+  project: Project;
+  depth?: number;
+}> = (props) => {
   const depth = () => props.depth || 0;
 
   return (
@@ -80,11 +46,11 @@ const ProjectItem: Component<{ project: Project; depth?: number }> = (
           style={{ "margin-left": `${depth() * 16}px` }}
         >
           <span class="text-sm font-medium text-gray-700 group-hover:text-black truncate">
-            {props.project.name}
+            {props.project.title}
           </span>
-          <span class="text-xs text-gray-500 ml-2 flex-shrink-0">
+          {/* <span class="text-xs text-gray-500 ml-2 flex-shrink-0">
             {props.project.taskCount}
-          </span>
+          </span> */}
         </div>
       </button>
       <For each={props.project.subprojects}>
@@ -96,7 +62,9 @@ const ProjectItem: Component<{ project: Project; depth?: number }> = (
   );
 };
 
-export default function SideBar() {
+const SideBar: VoidComponent = () => {
+  const [projects, { refetch }] = createResource(getProjects);
+
   const { showAndWait: showCreateProject } = useDialog(CreateProject);
   const navigate = useNavigate();
 
@@ -104,6 +72,7 @@ export default function SideBar() {
     const returning = await showCreateProject();
     if (!returning) return;
 
+    await refetch();
     navigate(`/tasks/${returning.id}`);
   };
 
@@ -158,11 +127,13 @@ export default function SideBar() {
             </button>
           </div>
 
-          <div class="">
-            <For each={mockProjects}>
-              {(project) => <ProjectItem project={project} />}
-            </For>
-          </div>
+          <Suspense fallback={<p>loading...</p>}>
+            <div class="flex flex-col">
+              <For each={projects()}>
+                {(project) => <ProjectItem project={project} />}
+              </For>
+            </div>
+          </Suspense>
         </div>
       </nav>
 
@@ -175,4 +146,6 @@ export default function SideBar() {
       </div>
     </aside>
   );
-}
+};
+
+export default SideBar;
