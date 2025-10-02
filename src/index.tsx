@@ -6,6 +6,7 @@ import { Router } from "@solidjs/router";
 import { render } from "solid-js/web";
 import { ErrorBoundary, Show, Suspense } from "solid-js";
 import database from "./database";
+import SideBar from "./components/SideBar";
 
 render(
   () => (
@@ -32,9 +33,12 @@ render(
       >
         <Router
           root={(props) => (
-            <Suspense fallback={<p>loading route...</p>}>
-              {props.children}
-            </Suspense>
+            <div class="flex h-screen bg-gray-50">
+              <SideBar />
+              <Suspense fallback={<p>loading route...</p>}>
+                {props.children}
+              </Suspense>
+            </div>
           )}
         >
           {routes}
