@@ -1,7 +1,9 @@
 import { For, Show, type Component } from "solid-js";
 import TablerPlus from "~icons/tabler/plus";
 import TablerAlbum from "~icons/tabler/album";
-import { A } from "@solidjs/router";
+import { A, useNavigate } from "@solidjs/router";
+import { useDialog } from "../hooks/dialog";
+import CreateProject from "./dialogs/CreateProject";
 
 // Mock data for projects - replace with actual data later
 const mockProjects = [
@@ -95,6 +97,16 @@ const ProjectItem: Component<{ project: Project; depth?: number }> = (
 };
 
 export default function SideBar() {
+  const { showAndWait: showCreateProject } = useDialog(CreateProject);
+  const navigate = useNavigate();
+
+  const createProject = async (): Promise<void> => {
+    const returning = await showCreateProject();
+    if (!returning) return;
+
+    navigate(`/tasks/${returning.id}`);
+  };
+
   return (
     <aside class="h-screen w-64 bg-white border-r border-gray-300 flex flex-col">
       {/* Header */}
@@ -137,7 +149,11 @@ export default function SideBar() {
             <h3 class="text-xs font-semibold text-gray-600 uppercase tracking-wider">
               Projects
             </h3>
-            <button class="w-4 h-4 text-gray-500 hover:text-black transition-colors">
+            <button
+              type="button"
+              class="w-4 h-4 text-gray-500 hover:text-black transition-colors"
+              onClick={createProject}
+            >
               <TablerPlus />
             </button>
           </div>
