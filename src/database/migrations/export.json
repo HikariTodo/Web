@@ -1,0 +1,11 @@
+[
+  {
+    "sql": [
+      "CREATE TABLE IF NOT EXISTS \"projects\" (\n\t\"id\" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,\n\t\"title\" varchar(100) NOT NULL,\n\t\"parent\" uuid\n);\n",
+      "\nALTER TABLE \"projects\" ADD CONSTRAINT \"projects_parent_projects_id_fk\" FOREIGN KEY (\"parent\") REFERENCES \"public\".\"projects\"(\"id\") ON DELETE no action ON UPDATE no action;"
+    ],
+    "bps": true,
+    "folderMillis": 1759414719230,
+    "hash": "3a0df537da8839fc049d8e60432424d474fb31d238999f2f918351323ec499db"
+  }
+]
