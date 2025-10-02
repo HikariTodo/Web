@@ -6,4 +6,7 @@ import icons from "unplugin-icons/vite";
 
 export default defineConfig({
   plugins: [unocss(), icons({ compiler: "solid" }), solid(), pages()],
+  optimizeDeps: {
+    exclude: ["@electric-sql/pglite"],
+  },
 });
