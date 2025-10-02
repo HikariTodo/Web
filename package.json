@@ -5,15 +5,22 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "migration": "bun run drizzle-kit generate && bun run scripts/migration.ts",
+    "build": "bun run migration && vite build"
   },
   "dependencies": {
+    "@corvu/dialog": "^0.2.4",
+    "@electric-sql/pglite": "^0.3.10",
+    "@noble/hashes": "^2.0.1",
     "@solidjs/router": "^0.15.3",
+    "drizzle-orm": "^0.44.6",
     "solid-js": "^1.9.9"
   },
   "devDependencies": {
     "@iconify-json/tabler": "^1.2.23",
+    "@types/bun": "^1.2.23",
+    "@unocss/extractor-arbitrary-variants": "^66.5.2",
+    "drizzle-kit": "^0.31.5",
     "typescript": "~5.9.3",
     "unocss": "^66.5.2",
     "unplugin-icons": "^22.4.1",
