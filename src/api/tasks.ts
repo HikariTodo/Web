@@ -142,3 +142,92 @@ export const unassignTask = async (taskId: string): Promise<Task> => {
 
   return updatedTask;
 };
+
+export const updateTaskStatus = async (
+  taskId: string,
+  status: "todo" | "in_progress" | "done"
+): Promise<Task> => {
+  console.log(`[api]: updating task ${taskId} status to ${status}...`);
+
+  const [updatedTask] = await database.client
+    .update(database.schema.tasks)
+    .set({
+      status,
+      updatedAt: new Date(),
+    })
+    .where(eq(database.schema.tasks.id, taskId))
+    .returning();
+
+  return updatedTask;
+};
+
+export const getTodayTasks = async (): Promise<TaskWithProject[]> => {
+  console.log("[api]: fetching today's tasks...");
+
+  const today = new Date().toISOString().split("T")[0];
+
+  // Get tasks that are either assigned for today or due today
+  const tasks = await database.client
+    .select({
+      id: database.schema.tasks.id,
+      title: database.schema.tasks.title,
+      projectId: database.schema.tasks.projectId,
+      priority: database.schema.tasks.priority,
+      status: database.schema.tasks.status,
+      deadline: database.schema.tasks.deadline,
+      assignedFor: database.schema.tasks.assignedFor,
+      createdAt: database.schema.tasks.createdAt,
+      updatedAt: database.schema.tasks.updatedAt,
+      projectTitle: database.schema.projects.title,
+    })
+    .from(database.schema.tasks)
+    .leftJoin(
+      database.schema.projects,
+      eq(database.schema.tasks.projectId, database.schema.projects.id)
+    )
+    .orderBy(
+      asc(database.schema.tasks.deadline),
+      desc(database.schema.tasks.priority),
+      desc(database.schema.tasks.createdAt)
+    );
+
+  // Get all projects to build breadcrumbs
+  const allProjects = await database.client
+    .select()
+    .from(database.schema.projects);
+
+  // Build project map for breadcrumb generation
+  const projectMap = new Map(allProjects.map((p) => [p.id, p]));
+
+  // Add breadcrumbs to each task
+  const tasksWithBreadcrumbs = tasks.map((task) => {
+    const breadcrumbs: string[] = [];
+    let currentProjectId: string | null = task.projectId;
+
+    while (currentProjectId && projectMap.has(currentProjectId)) {
+      const project = projectMap.get(currentProjectId);
+      if (project) {
+        breadcrumbs.unshift(project.title);
+        currentProjectId = project.parent;
+      } else {
+        break;
+      }
+    }
+
+    return {
+      ...task,
+      projectBreadcrumbs: breadcrumbs,
+    };
+  });
+
+  // Filter for today's tasks (assigned for today or due today)
+  return tasksWithBreadcrumbs.filter((task) => {
+    const taskDeadline = task.deadline
+      ? new Date(task.deadline).toISOString().split("T")[0]
+      : null;
+    const isAssignedForToday = task.assignedFor === today;
+    const isDueToday = taskDeadline === today;
+
+    return isAssignedForToday || isDueToday;
+  });
+};
