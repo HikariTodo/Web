@@ -9,33 +9,15 @@ import TablerCalendar from "~icons/tabler/calendar";
 import TablerAlertCircle from "~icons/tabler/alert-circle";
 import TablerCheck from "~icons/tabler/check";
 import TablerPlus from "~icons/tabler/plus";
-import TablerX from "~icons/tabler/x";
-import { reconcile } from "solid-js/store";
 
 function getStatusColor(status: string) {
   switch (status) {
     case "done":
-      return "text-green-500";
+      return "text-emerald-600";
     case "in_progress":
-      return "text-blue-500";
+      return "text-blue-600";
     default:
-      return "text-gray-500";
-  }
-}
-
-function getStatusLabel(status: string, assignedFor: string | null) {
-  const today = new Date().toISOString().split("T")[0];
-  const isAssignedToday = assignedFor === today;
-
-  switch (status) {
-    case "todo":
-      return isAssignedToday ? "ASSIGNED" : "UNASSIGNED";
-    case "in_progress":
-      return "IN PROGRESS";
-    case "done":
-      return "DONE";
-    default:
-      return status.toUpperCase();
+      return "text-slate-500";
   }
 }
 
@@ -135,11 +117,15 @@ export default function Overview() {
   };
 
   return (
-    <main class="flex-1 overflow-auto">
+    <main class="flex-1 overflow-auto bg-white">
       <div class="p-8">
-        <div class="mb-6">
-          <h1 class="text-2xl font-semibold text-black mb-2">Overview</h1>
-          <p class="text-gray-600">All tasks sorted by deadline and priority</p>
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold tracking-tight text-black mb-2">
+            Overview
+          </h1>
+          <p class="text-slate-600 text-sm">
+            All tasks sorted by deadline and priority
+          </p>
         </div>
 
         <Suspense
@@ -147,123 +133,191 @@ export default function Overview() {
             <div class="space-y-3">
               <For each={Array.from({ length: 5 })}>
                 {() => (
-                  <div class="bg-gray-200 rounded-lg p-4 animate-pulse h-20" />
+                  <div class="bg-slate-100 rounded-lg p-4 animate-pulse h-20" />
                 )}
               </For>
             </div>
           }
         >
           <Show when={tasks()?.length === 0}>
-            <div class="text-center py-12">
-              <div class="text-gray-400 mb-2">
-                <TablerCheck class="w-12 h-12 mx-auto" />
+            <div class="text-center py-16">
+              <div class="text-slate-400 mb-4">
+                <TablerCheck class="w-16 h-16 mx-auto" />
               </div>
-              <p class="text-gray-600">
-                No tasks found. Create your first task to get started!
+              <h3 class="text-lg font-semibold text-slate-900 mb-2">
+                No tasks found
+              </h3>
+              <p class="text-slate-600 text-sm">
+                Create your first task to get started!
               </p>
             </div>
           </Show>
 
           <Show when={tasks()?.length}>
-            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <table class="w-full">
-                <thead class="bg-gray-50">
+            <div class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+              <table class="w-full table-fixed">
+                <thead class="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="w-2/5 px-6 py-4 text-left text-xs font-semibold text-slate-900 uppercase tracking-wider">
                       Task
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Project
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="w-1/6 px-6 py-4 text-left text-xs font-semibold text-slate-900 uppercase tracking-wider">
                       Status
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="w-1/6 px-6 py-4 text-left text-xs font-semibold text-slate-900 uppercase tracking-wider">
                       Due
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
+                    <th class="w-1/4 px-6 py-4 text-left text-xs font-semibold text-slate-900 uppercase tracking-wider">
+                      Assigned For
                     </th>
                   </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white divide-y divide-slate-200">
                   <For each={tasks()}>
                     {(task: TaskWithProject) => (
-                      <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4">
+                      <tr
+                        class={`transition-colors ${
+                          isAssignedToToday(task.assignedFor)
+                            ? "bg-gray-50"
+                            : ""
+                        }`}
+                      >
+                        <td class="px-6 py-4 w-2/5">
                           <div class="flex items-center gap-3">
                             <div class="flex-1 min-w-0">
-                              <div class="flex items-center gap-2">
-                                <h3 class="text-sm font-medium text-black">
+                              <div class="flex items-center gap-3 mb-1">
+                                <h3 class="text-sm font-medium text-slate-900 truncate">
                                   {task.title}
                                 </h3>
                                 <Show when={task.priority === "urgent"}>
-                                  <span class="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 bg-red-100 text-red-600 font-medium rounded">
-                                    <TablerAlertCircle class="w-3 h-3" />
+                                  <span class="inline-flex items-center gap-1.5 text-xs px-2 py-1 bg-red-50 text-red-700 font-medium rounded-md border border-red-200 whitespace-nowrap">
+                                    <TablerAlertCircle class="w-3 h-3 flex-shrink-0" />
                                     URGENT
                                   </span>
                                 </Show>
                               </div>
+                              <Show when={task.projectBreadcrumbs?.length > 0}>
+                                <div class="text-xs text-slate-500 truncate">
+                                  {task.projectBreadcrumbs.join(" → ")}
+                                </div>
+                              </Show>
                             </div>
                           </div>
                         </td>
-                        <td class="px-6 py-4">
-                          <span class="text-sm text-gray-900">
-                            {task.projectTitle || "Unknown Project"}
-                          </span>
-                        </td>
-                        <td class="px-6 py-4">
-                          <span
-                            class={`inline-flex items-center gap-1 text-xs font-medium ${getStatusColor(
-                              task.status
-                            )}`}
-                          >
-                            <span class="w-2 h-2 rounded-full bg-current" />
-                            {getStatusLabel(task.status, task.assignedFor)}
-                          </span>
-                        </td>
-                        <td class="px-6 py-4">
-                          <div
-                            class={`text-sm ${
-                              isOverdue(task.deadline)
-                                ? "text-red-500 font-medium"
-                                : "text-gray-900"
-                            }`}
-                          >
-                            <div class="flex items-center gap-1 mb-1">
-                              <TablerCalendar class="w-3 h-3" />
-                              {formatDate(task.deadline)}
-                            </div>
-                            <Show when={task.deadline}>
-                              <div class="text-xs text-gray-600">
-                                {formatTime(task.deadline)}
-                              </div>
+                        <td class="px-6 py-4 w-1/6">
+                          <div class="h-6 flex items-center">
+                            <Show when={task.assignedFor}>
+                              <span
+                                class={`inline-flex items-center gap-1 text-xs font-medium whitespace-nowrap ${getStatusColor(
+                                  task.status
+                                )}`}
+                              >
+                                <span class="w-2 h-2 rounded-full bg-current flex-shrink-0" />
+                                {task.status === "done"
+                                  ? "DONE"
+                                  : task.status === "in_progress"
+                                  ? "IN PROGRESS"
+                                  : "TODO"}
+                              </span>
                             </Show>
                           </div>
                         </td>
-                        <td class="px-6 py-4">
-                          <div class="flex items-center gap-2">
-                            <Show
-                              when={isAssignedToToday(task.assignedFor)}
-                              fallback={
-                                <button
-                                  onClick={() => handleAssignToToday(task.id)}
-                                  class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 rounded transition-colors"
-                                  title="Assign to Today"
-                                >
-                                  <TablerPlus class="w-3 h-3" />
-                                  Today
-                                </button>
-                              }
+                        <td class="px-6 py-4 w-1/6">
+                          <div class="min-h-[2.5rem] flex flex-col justify-center">
+                            <div
+                              class={`text-sm ${
+                                isOverdue(task.deadline)
+                                  ? "text-red-600 font-medium"
+                                  : "text-slate-900"
+                              }`}
                             >
-                              <button
-                                onClick={() => handleUnassignTask(task.id)}
-                                class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 rounded transition-colors"
-                                title="Unassign from Today"
+                              <div class="flex items-center gap-2 mb-1">
+                                <span class="font-medium whitespace-nowrap">
+                                  {formatDate(task.deadline)}
+                                </span>
+                              </div>
+                              <Show when={task.deadline}>
+                                <div class="text-xs text-slate-500">
+                                  {formatTime(task.deadline)}
+                                </div>
+                              </Show>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 w-1/4">
+                          <div class="min-h-[2.5rem] flex items-center">
+                            <Show when={task.status === "done"}>
+                              <Show
+                                when={task.assignedFor}
+                                fallback={
+                                  <span class="text-xs text-gray-400">
+                                    Not assigned
+                                  </span>
+                                }
                               >
-                                <TablerX class="w-3 h-3" />
-                                Remove
-                              </button>
+                                <span class="text-xs text-gray-600">
+                                  {new Date(
+                                    task.assignedFor!
+                                  ).toLocaleDateString()}
+                                </span>
+                              </Show>
+                            </Show>
+
+                            <Show when={task.status !== "done"}>
+                              <div class="flex items-center gap-2 w-full">
+                                <Show
+                                  when={isAssignedToToday(task.assignedFor)}
+                                  fallback={
+                                    <Show
+                                      when={task.assignedFor}
+                                      fallback={
+                                        <button
+                                          onClick={() =>
+                                            handleAssignToToday(task.id)
+                                          }
+                                          class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-slate-900 text-white hover:bg-slate-800 rounded-md transition-colors whitespace-nowrap"
+                                          title="Assign to Today"
+                                        >
+                                          <TablerPlus class="w-3 h-3 flex-shrink-0" />
+                                          Today
+                                        </button>
+                                      }
+                                    >
+                                      <div class="flex items-center gap-2 w-full">
+                                        <span class="text-xs text-slate-600 font-medium whitespace-nowrap">
+                                          {new Date(
+                                            task.assignedFor!
+                                          ).toLocaleDateString()}
+                                        </span>
+                                        <button
+                                          onClick={() =>
+                                            handleUnassignTask(task.id)
+                                          }
+                                          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-red-50 text-red-700 hover:bg-red-100 rounded-md border border-red-200 transition-colors whitespace-nowrap flex-shrink-0"
+                                          title="Give up this task"
+                                        >
+                                          Give up
+                                        </button>
+                                      </div>
+                                    </Show>
+                                  }
+                                >
+                                  <div class="flex items-center gap-4 w-full">
+                                    <span class="inline-flex items-center text-xs bg-gray-50 text-gray-700 py-1.5 rounded-md font-medium whitespace-nowrap">
+                                      Today
+                                    </span>
+                                    <button
+                                      onClick={() =>
+                                        handleUnassignTask(task.id)
+                                      }
+                                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-red-50 text-red-700 hover:bg-red-100 rounded-md border border-red-200 transition-colors whitespace-nowrap flex-shrink-0"
+                                      title="Give up today's task"
+                                    >
+                                      Give up
+                                    </button>
+                                  </div>
+                                </Show>
+                              </div>
                             </Show>
                           </div>
                         </td>

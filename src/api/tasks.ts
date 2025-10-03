@@ -4,7 +4,10 @@ import database from "../database";
 
 export type Task = InferSelectModel<typeof database.schema.tasks>;
 export type NewTask = InferInsertModel<typeof database.schema.tasks>;
-export type TaskWithProject = Task & { projectTitle: string | null };
+export type TaskWithProject = Task & {
+  projectTitle: string | null;
+  projectBreadcrumbs: string[];
+};
 
 export const getTasksByProject = async (projectId: string): Promise<Task[]> => {
   console.log(`[api]: fetching tasks for project ${projectId}...`);
@@ -25,6 +28,7 @@ export const getTasksByProject = async (projectId: string): Promise<Task[]> => {
 export const getAllTasks = async (): Promise<TaskWithProject[]> => {
   console.log("[api]: fetching all tasks...");
 
+  // First get all tasks with their immediate project
   const tasks = await database.client
     .select({
       id: database.schema.tasks.id,
@@ -42,9 +46,43 @@ export const getAllTasks = async (): Promise<TaskWithProject[]> => {
     .leftJoin(
       database.schema.projects,
       eq(database.schema.tasks.projectId, database.schema.projects.id)
+    )
+    .orderBy(
+      asc(database.schema.tasks.deadline),
+      desc(database.schema.tasks.priority),
+      desc(database.schema.tasks.createdAt)
     );
 
-  return tasks;
+  // Get all projects to build breadcrumbs
+  const allProjects = await database.client
+    .select()
+    .from(database.schema.projects);
+
+  // Build project map for breadcrumb generation
+  const projectMap = new Map(allProjects.map((p) => [p.id, p]));
+
+  // Add breadcrumbs to each task
+  const tasksWithBreadcrumbs = tasks.map((task) => {
+    const breadcrumbs: string[] = [];
+    let currentProjectId: string | null = task.projectId;
+
+    while (currentProjectId && projectMap.has(currentProjectId)) {
+      const project = projectMap.get(currentProjectId);
+      if (project) {
+        breadcrumbs.unshift(project.title);
+        currentProjectId = project.parent;
+      } else {
+        break;
+      }
+    }
+
+    return {
+      ...task,
+      projectBreadcrumbs: breadcrumbs,
+    };
+  });
+
+  return tasksWithBreadcrumbs;
 };
 
 export const createTask = async (task: NewTask): Promise<Task> => {
