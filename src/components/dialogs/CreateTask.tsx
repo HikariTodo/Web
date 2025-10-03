@@ -93,7 +93,7 @@ const CreateTask: VoidComponent<
           <div class="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={() => props.setOpen(false)}
+              onClick={() => props.resolve()}
               class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 rounded-md font-medium transition-colors"
             >
               Cancel
