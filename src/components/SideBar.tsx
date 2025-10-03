@@ -24,34 +24,32 @@ const ProjectItem: Component<{
     <>
       <A
         href={`/projects/${props.project.id}`}
-        class="w-full flex items-center px-3 py-2 text-left rounded-lg hover:bg-gray-100 transition-colors group relative"
+        class="w-full flex items-center gap-3 py-1.5 px-2 rounded hover:(bg-#F7F7F7 text-#585858) group transition-colors relative"
       >
         <Show when={depth() > 0}>
           <For each={Array.from({ length: depth() })}>
             {(_, i) => (
               <div
-                class="absolute top-0 bottom-0 w-0.5 bg-gray-200"
+                class="absolute inset-y-0 w-2px bg-#7C7C7C/20 group-hover:bg-#585858/50"
                 style={{
-                  left: `${12 + i() * 16}px`,
+                  left: `${10 + i() * 16}px`,
                 }}
               />
             )}
           </For>
-          <div
+          {/* <div
             class="absolute top-1/2 w-3 h-0.5 bg-gray-200"
             style={{
-              left: `${12 + (depth() - 1) * 16}px`,
+              left: `${10 + (depth() - 1) * 16}px`,
             }}
-          />
+          /> */}
         </Show>
 
         <div
           class="flex-1 min-w-0 flex items-center justify-between"
           style={{ "margin-left": `${depth() * 16}px` }}
         >
-          <span class="text-sm font-medium text-gray-700 group-hover:text-black truncate">
-            {props.project.title}
-          </span>
+          <span class="text-sm truncate">{props.project.title}</span>
           {/* <span class="text-xs text-gray-500 ml-2 flex-shrink-0">
             {props.project.taskCount}
           </span> */}
