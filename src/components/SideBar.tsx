@@ -5,9 +5,12 @@ import {
   Suspense,
   type Component,
   type VoidComponent,
+  createSignal,
 } from "solid-js";
 import TablerPlus from "~icons/tabler/plus";
 import TablerAlbum from "~icons/tabler/album";
+import TablerChevronDown from "~icons/tabler/chevron-down";
+import TablerChevronRight from "~icons/tabler/chevron-right";
 import { A, useNavigate } from "@solidjs/router";
 import { useDialog } from "../hooks/dialog";
 import CreateProject from "./dialogs/CreateProject";
@@ -17,55 +20,101 @@ import TextLogo from "./assets/TextLogo";
 const ProjectItem: Component<{
   project: Project;
   depth?: number;
+  expandedProjects: () => Set<string>;
+  setExpandedProjects: (fn: (prev: Set<string>) => Set<string>) => void;
 }> = (props) => {
   const depth = () => props.depth || 0;
+  const hasSubprojects = () =>
+    props.project.subprojects && props.project.subprojects.length > 0;
+  const isExpanded = () => props.expandedProjects().has(props.project.id);
+
+  const toggleExpanded = (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+    props.setExpandedProjects((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(props.project.id)) {
+        newSet.delete(props.project.id);
+      } else {
+        newSet.add(props.project.id);
+      }
+      return newSet;
+    });
+  };
 
   return (
     <>
-      <A
-        href={`/projects/${props.project.id}`}
-        class="w-full flex items-center gap-3 py-1.5 px-2 rounded hover:(bg-#F7F7F7 text-#585858) group transition-colors relative"
-      >
+      <div class="relative">
         <Show when={depth() > 0}>
           <For each={Array.from({ length: depth() })}>
             {(_, i) => (
               <div
-                class="absolute inset-y-0 w-2px bg-#7C7C7C/20 group-hover:bg-#585858/50"
+                class="absolute inset-y-0 w-1px bg-#7C7C7C/20"
                 style={{
-                  left: `${10 + i() * 16}px`,
+                  left: `${15.5 + i() * 16}px`,
                 }}
               />
             )}
           </For>
-          {/* <div
-            class="absolute top-1/2 w-3 h-0.5 bg-gray-200"
-            style={{
-              left: `${10 + (depth() - 1) * 16}px`,
-            }}
-          /> */}
         </Show>
 
-        <div
-          class="flex-1 min-w-0 flex items-center justify-between"
-          style={{ "margin-left": `${depth() * 16}px` }}
-        >
-          <span class="text-sm truncate">{props.project.title}</span>
-          {/* <span class="text-xs text-gray-500 ml-2 flex-shrink-0">
-            {props.project.taskCount}
-          </span> */}
+        <div class="flex items-center">
+          <div
+            class="flex items-center w-full py-1.5 px-2 hover:(bg-#F7F7F7 text-#585858) group transition-colors"
+            classList={{
+              rounded: depth() === 0,
+              "rounded-r": depth() > 0,
+            }}
+            style={{ "margin-left": `${depth() * 16}px` }}
+          >
+            <Show when={hasSubprojects()}>
+              <button
+                onClick={toggleExpanded}
+                class="flex items-center justify-center w-4 h-4 mr-1 text-#7C7C7C hover:text-#585858 transition-colors"
+              >
+                <Show
+                  when={isExpanded()}
+                  fallback={<TablerChevronRight class="w-3 h-3" />}
+                >
+                  <TablerChevronDown class="w-3 h-3" />
+                </Show>
+              </button>
+            </Show>
+            <Show when={!hasSubprojects()}>
+              <div class="w-5 mr-1" /> {/* Spacer for alignment */}
+            </Show>
+
+            <A
+              href={`/projects/${props.project.id}`}
+              class="flex-1 min-w-0 flex items-center justify-between"
+            >
+              <span class="text-sm truncate">{props.project.title}</span>
+            </A>
+          </div>
         </div>
-      </A>
-      <For each={props.project.subprojects}>
-        {(subproject) => (
-          <ProjectItem project={subproject} depth={depth() + 1} />
-        )}
-      </For>
+      </div>
+
+      <Show when={hasSubprojects() && isExpanded()}>
+        <For each={props.project.subprojects}>
+          {(subproject) => (
+            <ProjectItem
+              project={subproject}
+              depth={depth() + 1}
+              expandedProjects={props.expandedProjects}
+              setExpandedProjects={props.setExpandedProjects}
+            />
+          )}
+        </For>
+      </Show>
     </>
   );
 };
 
 const SideBar: VoidComponent = () => {
   const [projects, { refetch }] = createResource(getProjects);
+  const [expandedProjects, setExpandedProjects] = createSignal<Set<string>>(
+    new Set()
+  );
 
   const { showAndWait: showCreateProject } = useDialog(CreateProject);
   const navigate = useNavigate();
@@ -112,7 +161,13 @@ const SideBar: VoidComponent = () => {
           <Suspense fallback={<p>loading...</p>}>
             <div class="flex flex-col">
               <For each={projects()}>
-                {(project) => <ProjectItem project={project} />}
+                {(project) => (
+                  <ProjectItem
+                    project={project}
+                    expandedProjects={expandedProjects}
+                    setExpandedProjects={setExpandedProjects}
+                  />
+                )}
               </For>
             </div>
           </Suspense>
