@@ -7,5 +7,16 @@
     "bps": true,
     "folderMillis": 1759414719230,
     "hash": "3a0df537da8839fc049d8e60432424d474fb31d238999f2f918351323ec499db"
+  },
+  {
+    "sql": [
+      "CREATE TYPE \"public\".\"task_priority\" AS ENUM('urgent', 'normal');",
+      "\nCREATE TYPE \"public\".\"task_status\" AS ENUM('todo', 'in_progress', 'done');",
+      "\nCREATE TABLE IF NOT EXISTS \"tasks\" (\n\t\"id\" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,\n\t\"title\" varchar(300) NOT NULL,\n\t\"project_id\" uuid NOT NULL,\n\t\"priority\" \"task_priority\" DEFAULT 'normal' NOT NULL,\n\t\"status\" \"task_status\" DEFAULT 'todo' NOT NULL,\n\t\"deadline\" timestamp,\n\t\"created_at\" timestamp DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp DEFAULT now() NOT NULL\n);\n",
+      "\nALTER TABLE \"tasks\" ADD CONSTRAINT \"tasks_project_id_projects_id_fk\" FOREIGN KEY (\"project_id\") REFERENCES \"public\".\"projects\"(\"id\") ON DELETE no action ON UPDATE no action;"
+    ],
+    "bps": true,
+    "folderMillis": 1759434263294,
+    "hash": "c8669288a81a23c044aba4717d4b1039394c16b85c03a9173b0b86dd1daa4301"
   }
 ]

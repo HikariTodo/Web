@@ -1,4 +1,4 @@
-import type { InferSelectModel } from "drizzle-orm";
+import { eq, type InferSelectModel } from "drizzle-orm";
 import database from "../database";
 
 export type LocalDbProject = InferSelectModel<typeof database.schema.projects>;
@@ -49,4 +49,17 @@ export const getProjects = async (): Promise<Array<Project>> => {
 
   const local = await database.client.select().from(database.schema.projects);
   return buildProjectTree(local);
+};
+
+export const getProjectById = async (
+  id: string
+): Promise<LocalDbProject | undefined> => {
+  console.log(`[api]: fetching project ${id}...`);
+
+  const [project] = await database.client
+    .select()
+    .from(database.schema.projects)
+    .where(eq(database.schema.projects.id, id));
+
+  return project;
 };
