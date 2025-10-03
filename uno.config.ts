@@ -5,4 +5,7 @@ export default defineConfig({
   presets: [presetWind4()],
   transformers: [transformerVariantGroup()],
   extractors: [extractorArbitraryVariants()],
+  extendTheme(theme) {
+    theme.font!.sans = "Inter," + theme.font!.sans;
+  },
 });

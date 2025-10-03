@@ -1,4 +1,7 @@
 /* @refresh reload */
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
 import "uno.css";
 import routes from "~solid-pages";
 
@@ -33,7 +36,7 @@ render(
       >
         <Router
           root={(props) => (
-            <div class="flex h-screen bg-gray-50">
+            <div class="flex h-screen bg-#F9F9F9">
               <SideBar />
               <Suspense fallback={<p>loading route...</p>}>
                 {props.children}

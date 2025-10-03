@@ -12,6 +12,7 @@ import { A, useNavigate } from "@solidjs/router";
 import { useDialog } from "../hooks/dialog";
 import CreateProject from "./dialogs/CreateProject";
 import { getProjects, type Project } from "../api/projects";
+import TextLogo from "./assets/TextLogo";
 
 const ProjectItem: Component<{
   project: Project;
@@ -80,52 +81,32 @@ const SideBar: VoidComponent = () => {
   };
 
   return (
-    <aside class="h-screen w-64 bg-white border-r border-gray-300 flex flex-col">
-      {/* Header */}
-      <div class="px-6 py-4 border-b border-gray-300">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-            <span class="text-white text-sm font-semibold">//</span>
-          </div>
-          <h1 class="text-lg font-semibold text-black">Hikari</h1>
-        </div>
-      </div>
+    <aside class="h-screen w-72 bg-white border-r border-#E7E7E7 flex flex-col">
+      <TextLogo class="text-#373737 w-70px mt-6 mx-6 mb-6" />
 
-      {/* Navigation */}
-      <nav class="flex-1 p-4 space-y-2">
-        {/* Dashboard */}
-        <div class="mb-6">
+      <nav class="flex flex-col grow-1 gap-6">
+        <div class="px-4 text-#7C7C7C">
           <A
             href="/"
-            class="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg hover:bg-gray-100 transition-colors group"
+            class="w-full flex items-center gap-3 py-2 px-2 rounded hover:(bg-#F7F7F7 text-#585858) transition-colors"
           >
             <TablerAlbum />
-            <span class="text-sm font-medium text-gray-700 group-hover:text-black">
-              Today
-            </span>
+            <span class="text-sm">Today</span>
           </A>
           <A
             href="/overview"
-            class="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg hover:bg-gray-100 transition-colors group"
+            class="w-full flex items-center gap-3 py-2 px-2 rounded hover:(bg-#F7F7F7 text-#585858) transition-colors"
           >
             <TablerAlbum />
-            <span class="text-sm font-medium text-gray-700 group-hover:text-black">
-              Overview
-            </span>
+            <span class="text-sm">All tasks</span>
           </A>
         </div>
 
-        {/* Projects Section */}
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Projects
-            </h3>
-            <button
-              type="button"
-              class="w-4 h-4 text-gray-500 hover:text-black transition-colors"
-              onClick={createProject}
-            >
+        <div class="px-4 text-#7C7C7C">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="pl-2 font-semibold text-#585858">Projects</h3>
+
+            <button type="button" class="text-gray-500" onClick={createProject}>
               <TablerPlus />
             </button>
           </div>
@@ -140,13 +121,12 @@ const SideBar: VoidComponent = () => {
         </div>
       </nav>
 
-      {/* Quick Actions */}
-      <div class="p-4 border-t border-gray-300">
+      {/* <div class="p-4 border-t border-gray-300">
         <button class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black hover:bg-gray-800 text-white rounded-lg transition-colors">
           <TablerPlus />
           <span class="text-sm font-medium">Quick Add Task</span>
         </button>
-      </div>
+      </div> */}
     </aside>
   );
 };
