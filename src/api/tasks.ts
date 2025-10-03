@@ -33,6 +33,7 @@ export const getAllTasks = async (): Promise<TaskWithProject[]> => {
       priority: database.schema.tasks.priority,
       status: database.schema.tasks.status,
       deadline: database.schema.tasks.deadline,
+      assignedFor: database.schema.tasks.assignedFor,
       createdAt: database.schema.tasks.createdAt,
       updatedAt: database.schema.tasks.updatedAt,
       projectTitle: database.schema.projects.title,
@@ -41,11 +42,6 @@ export const getAllTasks = async (): Promise<TaskWithProject[]> => {
     .leftJoin(
       database.schema.projects,
       eq(database.schema.tasks.projectId, database.schema.projects.id)
-    )
-    .orderBy(
-      asc(database.schema.tasks.deadline),
-      desc(database.schema.tasks.priority),
-      desc(database.schema.tasks.createdAt)
     );
 
   return tasks;
@@ -74,4 +70,37 @@ export const createSubproject = async (title: string, parentId: string) => {
     .returning();
 
   return newProject;
+};
+
+export const assignTaskToDate = async (
+  taskId: string,
+  date: string
+): Promise<Task> => {
+  console.log(`[api]: assigning task ${taskId} to date ${date}...`);
+
+  const [updatedTask] = await database.client
+    .update(database.schema.tasks)
+    .set({
+      assignedFor: date,
+      updatedAt: new Date(),
+    })
+    .where(eq(database.schema.tasks.id, taskId))
+    .returning();
+
+  return updatedTask;
+};
+
+export const unassignTask = async (taskId: string): Promise<Task> => {
+  console.log(`[api]: unassigning task ${taskId}...`);
+
+  const [updatedTask] = await database.client
+    .update(database.schema.tasks)
+    .set({
+      assignedFor: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(database.schema.tasks.id, taskId))
+    .returning();
+
+  return updatedTask;
 };

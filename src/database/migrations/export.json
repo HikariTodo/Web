@@ -18,5 +18,13 @@
     "bps": true,
     "folderMillis": 1759434263294,
     "hash": "c8669288a81a23c044aba4717d4b1039394c16b85c03a9173b0b86dd1daa4301"
+  },
+  {
+    "sql": [
+      "ALTER TABLE \"tasks\" ADD COLUMN \"assigned_for\" date;"
+    ],
+    "bps": true,
+    "folderMillis": 1759473977286,
+    "hash": "1567609681debae40743740cda9219e682a3efb103d9482da7d13f80c4a96eee"
   }
 ]

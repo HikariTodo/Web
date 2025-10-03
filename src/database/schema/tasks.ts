@@ -19,6 +19,7 @@ export const tasks = table("tasks", {
   priority: taskPriority().default("normal").notNull(),
   status: taskStatus().default("todo").notNull(),
   deadline: t.timestamp(),
+  assignedFor: t.date("assigned_for"),
   createdAt: t.timestamp("created_at").notNull().defaultNow(),
   updatedAt: t
     .timestamp("updated_at")

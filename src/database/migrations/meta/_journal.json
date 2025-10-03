@@ -15,6 +15,13 @@
       "when": 1759434263294,
       "tag": "0001_lonely_tinkerer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1759473977286,
+      "tag": "0002_superb_the_captain",
+      "breakpoints": true
     }
   ]
 }

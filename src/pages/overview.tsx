@@ -1,8 +1,16 @@
-import { For, createResource, Suspense, Show } from "solid-js";
-import { getAllTasks, type TaskWithProject } from "../api/tasks";
+import { For, createResource, Suspense, Show, createMemo } from "solid-js";
+import {
+  getAllTasks,
+  assignTaskToDate,
+  unassignTask,
+  type TaskWithProject,
+} from "../api/tasks";
 import TablerCalendar from "~icons/tabler/calendar";
 import TablerAlertCircle from "~icons/tabler/alert-circle";
 import TablerCheck from "~icons/tabler/check";
+import TablerPlus from "~icons/tabler/plus";
+import TablerX from "~icons/tabler/x";
+import { reconcile } from "solid-js/store";
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -15,10 +23,13 @@ function getStatusColor(status: string) {
   }
 }
 
-function getStatusLabel(status: string) {
+function getStatusLabel(status: string, assignedFor: string | null) {
+  const today = new Date().toISOString().split("T")[0];
+  const isAssignedToday = assignedFor === today;
+
   switch (status) {
     case "todo":
-      return "UNASSIGNED";
+      return isAssignedToday ? "ASSIGNED" : "UNASSIGNED";
     case "in_progress":
       return "IN PROGRESS";
     case "done":
@@ -65,7 +76,63 @@ function isOverdue(deadline: Date | null) {
 }
 
 export default function Overview() {
-  const [tasks] = createResource(getAllTasks);
+  const [_tasks, { mutate }] = createResource(getAllTasks);
+
+  const tasks = createMemo(() => {
+    if (!_tasks()) return;
+
+    let t = _tasks()!;
+    t.sort((a, b) => {
+      // First sort by deadline (earliest first, null deadlines last)
+      if (a.deadline && b.deadline) {
+        const deadlineComparison =
+          new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+        if (deadlineComparison !== 0) return deadlineComparison;
+      } else if (a.deadline && !b.deadline) {
+        return -1; // a has deadline, b doesn't - a comes first
+      } else if (!a.deadline && b.deadline) {
+        return 1; // b has deadline, a doesn't - b comes first
+      }
+
+      // Then sort by priority (urgent first)
+      if (a.priority === "urgent" && b.priority !== "urgent") return -1;
+      if (a.priority !== "urgent" && b.priority === "urgent") return 1;
+
+      // Finally sort by creation date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    return t;
+  });
+
+  const handleAssignToToday = async (taskId: string) => {
+    const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+    await assignTaskToDate(taskId, today);
+    mutate((prev) => {
+      let value = prev ?? [];
+      const old = value.find((t) => t.id === taskId)!;
+      value = value.filter((t) => t.id !== taskId);
+      value.push({ ...old, assignedFor: today });
+      return value;
+    });
+  };
+
+  const handleUnassignTask = async (taskId: string) => {
+    await unassignTask(taskId);
+    mutate((prev) => {
+      let value = prev ?? [];
+      const old = value.find((t) => t.id === taskId)!;
+      value = value.filter((t) => t.id !== taskId);
+      value.push({ ...old, assignedFor: null });
+      return value;
+    });
+  };
+
+  const isAssignedToToday = (assignedFor: string | null) => {
+    if (!assignedFor) return false;
+    const today = new Date().toISOString().split("T")[0];
+    return assignedFor === today;
+  };
 
   return (
     <main class="flex-1 overflow-auto">
@@ -152,7 +219,7 @@ export default function Overview() {
                             )}`}
                           >
                             <span class="w-2 h-2 rounded-full bg-current" />
-                            {getStatusLabel(task.status)}
+                            {getStatusLabel(task.status, task.assignedFor)}
                           </span>
                         </td>
                         <td class="px-6 py-4">
@@ -175,15 +242,30 @@ export default function Overview() {
                           </div>
                         </td>
                         <td class="px-6 py-4">
-                          <button class="text-gray-400 hover:text-gray-600 transition-colors">
-                            <svg
-                              class="w-4 h-4"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
+                          <div class="flex items-center gap-2">
+                            <Show
+                              when={isAssignedToToday(task.assignedFor)}
+                              fallback={
+                                <button
+                                  onClick={() => handleAssignToToday(task.id)}
+                                  class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 rounded transition-colors"
+                                  title="Assign to Today"
+                                >
+                                  <TablerPlus class="w-3 h-3" />
+                                  Today
+                                </button>
+                              }
                             >
-                              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                            </svg>
-                          </button>
+                              <button
+                                onClick={() => handleUnassignTask(task.id)}
+                                class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 rounded transition-colors"
+                                title="Unassign from Today"
+                              >
+                                <TablerX class="w-3 h-3" />
+                                Remove
+                              </button>
+                            </Show>
+                          </div>
                         </td>
                       </tr>
                     )}
