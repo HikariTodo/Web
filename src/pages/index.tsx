@@ -1,4 +1,5 @@
 import { For, createResource, Suspense, Show } from "solid-js";
+import { A } from "@solidjs/router";
 import {
   getTodayTasks,
   updateTaskStatus,
@@ -22,8 +23,14 @@ function formatDate(date: Date | null) {
   const taskDate = new Date(date);
   const today = new Date();
 
+  // Get tomorrow's date
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
   if (taskDate.toDateString() === today.toDateString()) {
     return "Today";
+  } else if (taskDate.toDateString() === tomorrow.toDateString()) {
+    return "Tomorrow";
   } else {
     return taskDate.toLocaleDateString(undefined, {
       month: "short",
@@ -65,8 +72,28 @@ function getRemainingTime(date: Date | null) {
   }
 }
 
-function getBreadcrumbs(projectBreadcrumbs: string[]) {
-  return projectBreadcrumbs.join(" → ");
+function getBreadcrumbs(
+  projectBreadcrumbs: Array<{ id: string; title: string }>
+) {
+  if (projectBreadcrumbs.length === 0) return null;
+
+  return (
+    <div class="text-xs text-gray-500">
+      {projectBreadcrumbs.map((project, index) => (
+        <>
+          <A
+            href={`/projects/${project.id}`}
+            class="text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
+          >
+            {project.title}
+          </A>
+          {index < projectBreadcrumbs.length - 1 && (
+            <span class="mx-1 text-slate-400">→</span>
+          )}
+        </>
+      ))}
+    </div>
+  );
 }
 
 // Custom checkbox component for three states
@@ -80,14 +107,14 @@ function TaskCheckbox(props: { status: string; onClick: () => void }) {
         "border-gray-300 bg-white hover:border-gray-400":
           props.status === "todo",
         // Doing state - blue with dash
-        "border-blue-500 bg-blue-500": props.status === "doing",
+        "border-blue-500 bg-blue-500": props.status === "in_progress",
         // Done state - green with checkmark
         "border-green-500 bg-green-500": props.status === "done",
       }}
     >
       <div class="w-full h-full flex items-center justify-center">
         {/* Doing state - horizontal dash */}
-        {props.status === "doing" && (
+        {props.status === "in_progress" && (
           <div class="w-2.5 h-.5 bg-white rounded-full" />
         )}
 
@@ -234,13 +261,13 @@ export default function View() {
                   <For each={doingTasks()}>
                     {(task) => (
                       <div
-                        class={`rounded-lg p-4 transition-colors ${
+                        class={`flex flex-col gap-2 rounded-lg p-4 transition-colors ${
                           task.priority === "urgent"
                             ? "bg-blue-50 border border-red-200 hover:border-red-300"
                             : "bg-blue-50 border border-blue-200 hover:border-blue-300"
                         }`}
                       >
-                        <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-start justify-between">
                           <div class="flex items-start gap-3 flex-1">
                             <TaskCheckbox
                               status={task.status}
@@ -308,13 +335,13 @@ export default function View() {
                   <For each={assignedTasks()}>
                     {(task) => (
                       <div
-                        class={`rounded-lg p-4 transition-colors ${
+                        class={`flex flex-col gap-2 rounded-lg p-4 transition-colors ${
                           task.priority === "urgent"
                             ? "bg-white border border-red-200 hover:border-red-300"
                             : "bg-white border border-gray-200 hover:border-gray-300"
                         }`}
                       >
-                        <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-start justify-between">
                           <div class="flex items-start gap-3 flex-1">
                             <TaskCheckbox
                               status={task.status}

@@ -6,7 +6,7 @@ export type Task = InferSelectModel<typeof database.schema.tasks>;
 export type NewTask = InferInsertModel<typeof database.schema.tasks>;
 export type TaskWithProject = Task & {
   projectTitle: string | null;
-  projectBreadcrumbs: string[];
+  projectBreadcrumbs: Array<{ id: string; title: string }>;
 };
 
 export const getTasksByProject = async (projectId: string): Promise<Task[]> => {
@@ -63,13 +63,13 @@ export const getAllTasks = async (): Promise<TaskWithProject[]> => {
 
   // Add breadcrumbs to each task
   const tasksWithBreadcrumbs = tasks.map((task) => {
-    const breadcrumbs: string[] = [];
+    const breadcrumbs: Array<{ id: string; title: string }> = [];
     let currentProjectId: string | null = task.projectId;
 
     while (currentProjectId && projectMap.has(currentProjectId)) {
       const project = projectMap.get(currentProjectId);
       if (project) {
-        breadcrumbs.unshift(project.title);
+        breadcrumbs.unshift({ id: project.id, title: project.title });
         currentProjectId = project.parent;
       } else {
         break;
@@ -201,13 +201,13 @@ export const getTodayTasks = async (): Promise<TaskWithProject[]> => {
 
   // Add breadcrumbs to each task
   const tasksWithBreadcrumbs = tasks.map((task) => {
-    const breadcrumbs: string[] = [];
+    const breadcrumbs: Array<{ id: string; title: string }> = [];
     let currentProjectId: string | null = task.projectId;
 
     while (currentProjectId && projectMap.has(currentProjectId)) {
       const project = projectMap.get(currentProjectId);
       if (project) {
-        breadcrumbs.unshift(project.title);
+        breadcrumbs.unshift({ id: project.id, title: project.title });
         currentProjectId = project.parent;
       } else {
         break;

@@ -1,11 +1,11 @@
 import { For, createResource, Suspense, Show, createMemo } from "solid-js";
+import { A } from "@solidjs/router";
 import {
   getAllTasks,
   assignTaskToDate,
   unassignTask,
   type TaskWithProject,
 } from "../api/tasks";
-import TablerCalendar from "~icons/tabler/calendar";
 import TablerAlertCircle from "~icons/tabler/alert-circle";
 import TablerCheck from "~icons/tabler/check";
 import TablerPlus from "~icons/tabler/plus";
@@ -198,7 +198,21 @@ export default function Overview() {
                               </div>
                               <Show when={task.projectBreadcrumbs?.length > 0}>
                                 <div class="text-xs text-slate-500 truncate">
-                                  {task.projectBreadcrumbs.join(" → ")}
+                                  {task.projectBreadcrumbs.map(
+                                    (project, index) => (
+                                      <>
+                                        <A
+                                          href={`/projects/${project.id}`}
+                                          class="hover:text-slate-700 transition-colors cursor-pointer"
+                                        >
+                                          {project.title}
+                                        </A>
+                                        {index <
+                                          task.projectBreadcrumbs.length -
+                                            1 && <span class="mx-1">→</span>}
+                                      </>
+                                    )
+                                  )}
                                 </div>
                               </Show>
                             </div>
