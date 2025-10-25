@@ -173,13 +173,6 @@ const SideBar: VoidComponent = () => {
           </Suspense>
         </div>
       </nav>
-
-      {/* <div class="p-4 border-t border-gray-300">
-        <button class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black hover:bg-gray-800 text-white rounded-lg transition-colors">
-          <TablerPlus />
-          <span class="text-sm font-medium">Quick Add Task</span>
-        </button>
-      </div> */}
     </aside>
   );
 };
