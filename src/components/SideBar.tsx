@@ -1,5 +1,4 @@
 import {
-  createResource,
   For,
   Show,
   Suspense,
@@ -14,8 +13,9 @@ import TablerChevronRight from "~icons/tabler/chevron-right";
 import { A, useNavigate } from "@solidjs/router";
 import { useDialog } from "../hooks/dialog";
 import CreateProject from "./dialogs/CreateProject";
-import { getProjects, type Project } from "../api/projects";
+import { type Project } from "../api/projects";
 import TextLogo from "./assets/TextLogo";
+import { projects, refetchProjects } from "../stores/projects";
 
 const ProjectItem: Component<{
   project: Project;
@@ -111,7 +111,6 @@ const ProjectItem: Component<{
 };
 
 const SideBar: VoidComponent = () => {
-  const [projects, { refetch }] = createResource(getProjects);
   const [expandedProjects, setExpandedProjects] = createSignal<Set<string>>(
     new Set()
   );
@@ -123,7 +122,7 @@ const SideBar: VoidComponent = () => {
     const returning = await showCreateProject();
     if (!returning) return;
 
-    await refetch();
+    await refetchProjects();
     navigate(`/projects/${returning.id}`);
   };
 

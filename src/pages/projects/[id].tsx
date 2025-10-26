@@ -10,6 +10,7 @@ import { getProjectById } from "../../api/projects";
 import { useDialog } from "../../hooks/dialog";
 import CreateTask from "../../components/dialogs/CreateTask";
 import CreateSubproject from "../../components/dialogs/CreateSubproject";
+import { refetchProjects } from "../../stores/projects";
 
 export default function View() {
   const params = useParams<{ id: string }>();
@@ -37,12 +38,12 @@ export default function View() {
   };
 
   const handleCreateSubproject = async () => {
-    const result = await createSubprojectDialog.showAndWait({
+    const returning = await createSubprojectDialog.showAndWait({
       projectId: params.id,
     });
-    if (result) {
-      // Could refetch projects here if needed
-    }
+    if (!returning) return;
+
+    await refetchProjects();
   };
 
   const formatDate = (date: Date | null) => {
